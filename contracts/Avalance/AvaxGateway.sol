@@ -39,6 +39,7 @@ contract AvaxGateway  is Pausable, TokenSet{
         address indexed wrappedToken, 
         uint amount
     );
+    
     function withdrawERC20To(
         address to, 
         address nativeToken, 
@@ -68,7 +69,8 @@ contract AvaxGateway  is Pausable, TokenSet{
         address wrappedToken, 
         uint amount
         ) public {
-        require(msg.sender == bridge, 'AvaxGateway: Only dridge can perform this function');
+
+        require(msg.sender == bridge, 'AvaxGateway: Only bridge can perform this action');
         require(tokenSet[nativeToken] == wrappedToken, 'AvaxGateway: Tokenset not supported');
 
         Mintable(wrappedToken).mint(to, amount);
