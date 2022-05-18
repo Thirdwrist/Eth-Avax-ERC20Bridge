@@ -10,13 +10,13 @@ contract WrappedToken is ERC20Burnable {
     
     address bridge;
     
-    constructor(address _bridge) ERC20('WrappedToken', 'WRT'){
+    constructor(address _bridge) ERC20('WrappedToken', 'WRPT'){
         bridge = _bridge;
     }
 
     function mint(address to, uint amount) public
     {
-        require(bridge == _msgSender(), 'NVT: Only bridge can mint new tokens');
+        require(bridge == _msgSender(), 'WRPT: Only bridge can mint new tokens');
         _mint(to, amount);
     }
 }
