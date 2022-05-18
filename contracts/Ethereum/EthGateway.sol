@@ -7,15 +7,16 @@ import "hardhat/console.sol";
 import "../Utils/TokenSet.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 
-contract EthGateway is Pausable , TokenSet{
+contract EthGateway is Ownable, Pausable , TokenSet{
 
     address escrew;
     address bridge;
 
-    constructor (address _escrew, address _bridge)
+    constructor (address _escrew, address _bridge) Ownable()
     {
         // set ownable 
         escrew = _escrew;
@@ -26,23 +27,34 @@ contract EthGateway is Pausable , TokenSet{
         address indexed nativeToken,
         address indexed wrappedToken,
         uint amount, 
-        address indexed sender, 
-        address reciever
+        address indexed from, 
+        address to
      );
 
-    function depositeERC20(address nativeToken, address wrappedToken, uint amount) public {
+    function depositeERC20(
+        address nativeToken, 
+        address wrappedToken, 
+        uint amount
+        ) public {
         depositeERC20To(nativeToken, wrappedToken, msg.sender, amount);
     }
 
-    function depositeERC20To(address nativeToken, address wrappedToken, address to, uint amount) whenNotPaused public {
+    function depositeERC20To(
+        address nativeToken, 
+        address wrappedToken, 
+        address to, 
+        uint amount
+        ) whenNotPaused public {
         // implement gasstation to collect all fees here and not on wrapped chain
 
         // is it from list of allowed tokens on native chain. 
         require(tokenSet[nativeToken] == wrappedToken, 'EthGateway: tokenset not supported');
 
         // send token to escrew
-        bool result = IERC20(nativeToken).transferFrom(msg.sender, escrew, amount);
+        bool result = IERC20(nativeToken).transferFrom(_msgSender(), escrew, amount);
         require(result, 'EthGateway: Token transfer failed');
+
+        emit ERC20TokenDeposited(nativeToken, wrappedToken, amount, _msgSender(), to);
         
         // hash the transaction to be used in wrapped bridge 
     }
@@ -59,9 +71,13 @@ contract EthGateway is Pausable , TokenSet{
         address reciever
      );
 
-    function finalizeWithdrawERC20(address nativeToken, address wrappedToken, uint amount) onlyBridge public {
+    function finalizeWithdrawERC20(
+        address nativeToken, 
+        address wrappedToken, 
+        uint amount
+        ) public {
         
-        require(msg.sender == bridge, 'EthGateway: Only dridge can perform this function');
+        require(msg.sender == bridge, 'EthGateway: Only bridge can perform this function');
         require(tokenSet[nativeToken] == wrappedToken, 'EthGateway: Tokenset not supported');
 
         // validation machanism to ensure that asset has been truely removed from wrapped chain
@@ -71,6 +87,14 @@ contract EthGateway is Pausable , TokenSet{
 
        require(result, 'EthGateway: Releasing token failed');
 
+    }
+
+    function pause() onlyOwner public{
+        _pause();
+    }
+
+     function unpause() onlyOwner public{
+        _unpause();
     }
 
 
