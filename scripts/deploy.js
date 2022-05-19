@@ -20,6 +20,21 @@ async function main() {
   await greeter.deployed();
 
   console.log("Greeter deployed to:", greeter.address);
+
+  const bridgeAddress = (await hre.ethers.getSigner()).address;
+
+  const Vault = await hre.ethers.getContractFactory('Vault');
+  const vault = await Vault.deploy();
+  await vault.deployed();
+
+  const EthGateway = await hre.ethers .getContractFactory('EthGateway');
+  const ethGateway = await EthGateway.deploy(vault.address, bridgeAddress); 
+  await ethGateway.deployed();
+
+  console.log("Greeter deployed to:", greeter.address);
+  console.log("Vault deployed to:", vault.address);
+  console.log("EthGateway deployed to:", ethGateway.address);
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere

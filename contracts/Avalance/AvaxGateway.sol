@@ -5,17 +5,14 @@ import "hardhat/console.sol";
 import "../Utils/TokenSet.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
-
-
 interface Mintable {
   function mint(address usr, uint256 wad) external;
-
   function burn(address usr, uint256 wad) external;
 }
 
 contract AvaxGateway  is Pausable, TokenSet{
 
-    address bridge;
+    address bridge; 
 
     constructor(address _bridge){
 
@@ -39,7 +36,7 @@ contract AvaxGateway  is Pausable, TokenSet{
         address indexed wrappedToken, 
         uint amount
     );
-    
+
     function withdrawERC20To(
         address to, 
         address nativeToken, 
@@ -51,7 +48,7 @@ contract AvaxGateway  is Pausable, TokenSet{
 
         Mintable(wrappedToken).burn(msg.sender, amount);
 
-        emit ERC20WithdrawalInitiated(msg,sender, to, wrappedToken, amount);
+        emit ERC20WithdrawalInitiated(msg.sender, to, wrappedToken, amount);
     }
 
     event ERC20TokenDepositeCompleted(

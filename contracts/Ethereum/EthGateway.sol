@@ -13,13 +13,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract EthGateway is Ownable, Pausable , TokenSet{
 
-    address escrew;
+    address vault;  // Change name to vault (actual name of contract)
     address bridge;
 
-    constructor (address _escrew, address _bridge) Ownable()
+    constructor (address _vault, address _bridge) Ownable()
     {
         // set ownable 
-        escrew = _escrew;
+        vault = _vault;
         bridge = _bridge;
     }
 
@@ -51,7 +51,7 @@ contract EthGateway is Ownable, Pausable , TokenSet{
         require(tokenSet[nativeToken] == wrappedToken, 'EthGateway: tokenset not supported');
 
         // send token to escrew
-        bool result = IERC20(nativeToken).transferFrom(_msgSender(), escrew, amount);
+        bool result = IERC20(nativeToken).transferFrom(_msgSender(), vault, amount);
         require(result, 'EthGateway: Token transfer failed');
 
         emit ERC20TokenDeposited(nativeToken, wrappedToken, amount, _msgSender(), to);
@@ -83,7 +83,7 @@ contract EthGateway is Ownable, Pausable , TokenSet{
         // validation machanism to ensure that asset has been truely removed from wrapped chain
 
         // transfer asset 
-       bool result =  IERC20(nativeToken).transferFrom(escrew, msg.sender, amount);
+       bool result =  IERC20(nativeToken).transferFrom(vault, msg.sender, amount);
 
        require(result, 'EthGateway: Releasing token failed');
 
@@ -95,6 +95,22 @@ contract EthGateway is Ownable, Pausable , TokenSet{
 
      function unpause() onlyOwner public{
         _unpause();
+    }
+
+    function getBridge() public view returns(address) {
+        return bridge;
+    }
+
+    function getVault() public view returns(address) {
+        return vault;
+    }
+
+    function nativeTokenExist(address nativeToken) public view returns(bool){
+        return tokenSetExist[nativeToken];
+    }
+
+    function getTokenSet(address nativeToken) public view returns(address, address){
+        return (nativeToken, tokenSet[nativeToken]);
     }
 
 
