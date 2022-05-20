@@ -13,8 +13,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract EthGateway is Ownable, Pausable , TokenSet{
 
-    address vault;  // Change name to vault (actual name of contract)
-    address bridge;
+    address private vault;  // Change name to vault (actual name of contract)
+    address private bridge;
 
     constructor (address _vault, address _bridge) Ownable()
     {
@@ -67,8 +67,8 @@ contract EthGateway is Ownable, Pausable , TokenSet{
         address indexed nativeToken,
         address indexed wrappedToken,
         uint amount, 
-        address indexed sender, 
-        address reciever
+        address indexed from, 
+        address to
      );
 
     function finalizeWithdrawERC20(
@@ -83,9 +83,23 @@ contract EthGateway is Ownable, Pausable , TokenSet{
         // validation machanism to ensure that asset has been truely removed from wrapped chain
 
         // transfer asset 
+        // vault should give this contract infinite ability to transfer asset on its behalf. 
        bool result =  IERC20(nativeToken).transferFrom(vault, msg.sender, amount);
 
        require(result, 'EthGateway: Releasing token failed');
+
+       emit ERC20TokenWrithdrawalFinalized(nativeToken, wrappedToken, amount, msg.sender, msg.sender);
+
+    }
+
+    function removeTokenSet(address nativeToken,  address wrappedToken) onlyOwner public override {
+         require(
+             IERC20(nativeToken).balanceOf(vault) == 0,
+              'Access: Token has to be empty to remove'
+        );
+         // NOTICE: might not be able to truely remove token if value was forcely sent to it, 
+        // maybe maintain a balance mapping for each token ID
+        super.removeTokenSet(nativeToken, wrappedToken);
 
     }
 
@@ -103,14 +117,6 @@ contract EthGateway is Ownable, Pausable , TokenSet{
 
     function getVault() public view returns(address) {
         return vault;
-    }
-
-    function nativeTokenExist(address nativeToken) public view returns(bool){
-        return tokenSetExist[nativeToken];
-    }
-
-    function getTokenSet(address nativeToken) public view returns(address, address){
-        return (nativeToken, tokenSet[nativeToken]);
     }
 
 

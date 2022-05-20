@@ -17,7 +17,8 @@ contract TokenSet is Ownable{
         address indexed wrappedToken
     ); 
     function addTokenSet(address nativeToken, address wrappedToken) onlyOwner public {
-         require(!tokenSetExist[nativeToken], 'EthGateway: Token set exits already');
+         require(!tokenSetExist[nativeToken], 'EthGateway: Token set exists already');
+         // add validation to make sure address is contract
 
          tokenSetExist[nativeToken] = true; 
          tokenSet[nativeToken] = wrappedToken;
@@ -32,22 +33,25 @@ contract TokenSet is Ownable{
 
     function removeTokenSet(
         address nativeToken, 
-        address wrappedToken, 
-        address currentToken
-    ) onlyOwner public{
+        address wrappedToken
+    ) onlyOwner public virtual{
 
         require(
             tokenSetExist[nativeToken] && tokenSet[nativeToken] == wrappedToken, 
             'Access: Token not in bridge'
          );
-         require(
-             IERC20(nativeToken).balanceOf(currentToken) == 0,
-              'Access: Token has to be empty to remove'
-            );
 
         delete tokenSet[nativeToken]; 
         delete tokenSetExist[nativeToken];
 
         emit tokenSetRemoved(nativeToken, wrappedToken);
+    }
+
+    function nativeTokenExist(address nativeToken) public view returns(bool){
+        return tokenSetExist[nativeToken];
+    }
+
+    function getTokenSet(address nativeToken) public view returns(address, address){
+        return (nativeToken, tokenSet[nativeToken]);
     }
 }

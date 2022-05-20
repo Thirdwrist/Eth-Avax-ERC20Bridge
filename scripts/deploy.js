@@ -13,27 +13,36 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
 
-  await greeter.deployed();
+  const bridgeAddress = (await hre.ethers.getSigners())[5].address;
 
-  console.log("Greeter deployed to:", greeter.address);
-
-  const bridgeAddress = (await hre.ethers.getSigner()).address;
-
+  // Vault deployment
   const Vault = await hre.ethers.getContractFactory('Vault');
   const vault = await Vault.deploy();
   await vault.deployed();
 
+  //  EthGateway deployment
   const EthGateway = await hre.ethers .getContractFactory('EthGateway');
   const ethGateway = await EthGateway.deploy(vault.address, bridgeAddress); 
   await ethGateway.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+  // Native ERC20 token deployment
+  const NativeToken = await hre.ethers.getContractFactory('NativeToken');
+  const nativeToken = await NativeToken.deploy();
+  await nativeToken.deployed();
+
+  // Wrapped ER20 token deployment
+  const WrappedToken = await hre.ethers.getContractFactory('WrappedToken');
+  const wrappedToken = await WrappedToken.deploy(bridgeAddress);
+  await wrappedToken.deployed();
+
+
+
   console.log("Vault deployed to:", vault.address);
   console.log("EthGateway deployed to:", ethGateway.address);
+  console.log("NativeToken deployed to:", nativeToken.address);
+  console.log("wrappedToken deployed to:", wrappedToken.address);
+
 
 }
 

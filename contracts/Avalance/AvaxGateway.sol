@@ -75,4 +75,16 @@ contract AvaxGateway  is Pausable, TokenSet{
         emit ERC20TokenDepositeCompleted(nativeToken, wrappedToken, amount, from, to);
 
     }
+
+     function removeTokenSet(address nativeToken,  address wrappedToken) onlyOwner public override {
+         require(
+             IERC20(wrappedToken).totalSupply() == 0,
+              'Access: Token has to be empty to remove'
+        );
+         // NOTICE: might not be able to truely remove token if value was forcely sent to it, 
+        // maybe maintain a balance mapping for each token ID
+        super.removeTokenSet(nativeToken, wrappedToken);
+
+    }
+
 }
