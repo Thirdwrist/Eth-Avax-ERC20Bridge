@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 
 interface Mintable {
   function mint(address usr, uint256 wad) external;
-  function burn(address usr, uint256 wad) external;
+  function burn(uint256 wad) external;
 }
 
 contract AvaxGateway  is Pausable, TokenSet{
@@ -46,7 +46,7 @@ contract AvaxGateway  is Pausable, TokenSet{
 
         require(tokenSet[nativeToken] == wrappedToken, 'AvaxGateway: tokenset not supported');
 
-        Mintable(wrappedToken).burn(msg.sender, amount);
+        Mintable(wrappedToken).burn(amount);
 
         emit ERC20WithdrawalInitiated(msg.sender, to, wrappedToken, amount);
     }
