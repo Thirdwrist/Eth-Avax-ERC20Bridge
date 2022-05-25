@@ -13,7 +13,8 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  const bridgeAddress = (await hre.ethers.getSigners())[5].address;
+  // const bridgeAddress = (await hre.ethers.getSigners())[5].address;
+  const [bridgeAddress] = await ethers.getSigners();
 
   // Vault deployment
   const Vault = await hre.ethers.getContractFactory('Vault');
@@ -22,12 +23,12 @@ async function main() {
 
   //  EthGateway deployment
   const EthGateway = await hre.ethers .getContractFactory('EthGateway');
-  const ethGateway = await EthGateway.deploy(vault.address, bridgeAddress); 
+  const ethGateway = await EthGateway.deploy(vault.address, bridgeAddress.address); 
   await ethGateway.deployed();
 
   // AvaxGateway 
   const AvaxGateway = await hre.ethers.getContractFactory("AvaxGateway");
-  const avaxGateway = await AvaxGateway.deploy(bridgeAddress);
+  const avaxGateway = await AvaxGateway.deploy(bridgeAddress.address);
   await avaxGateway.deployed();
 
   // Native ERC20 token deployment
@@ -48,7 +49,7 @@ async function main() {
   console.log("NativeToken deployed to:", nativeToken.address);
   console.log("WrappedToken deployed to:", wrappedToken.address);
   console.log("AvaxGateway deployed to:", avaxGateway.address);
-  console.log("Bridge address:",  bridgeAddress);
+  console.log("Bridge address:",  bridgeAddress.address);
   
 
 
